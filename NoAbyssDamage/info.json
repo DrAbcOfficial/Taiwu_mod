@@ -1,0 +1,10 @@
+{
+  "Id": "NoAbyssDamage",
+  "DisplayName": "深渊无伤",
+  "Author": "Dr.Abc",
+  "Version": "0.0.1",
+  "AssemblyName": "NoAbyssDamage.dll",
+  "EntryMethod": "NoAbyssDamage.Main.Load"
+  "HomePage": "https://github.com/DrAbcrealone/Taiwu_mod",
+  "Repository": "https://raw.github.com/DrAbcrealone/Taiwu_mod/tree/master/NoAbyssDamage/info.json"
+}
