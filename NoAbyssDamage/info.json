@@ -4,7 +4,7 @@
   "Author": "Dr.Abc",
   "Version": "0.0.1",
   "AssemblyName": "NoAbyssDamage.dll",
-  "EntryMethod": "NoAbyssDamage.Main.Load"
+  "EntryMethod": "NoAbyssDamage.Main.Load",
   "HomePage": "https://github.com/DrAbcrealone/Taiwu_mod",
   "Repository": "https://raw.githubusercontent.com/DrAbcrealone/Taiwu_mod/master/NoAbyssDamage/info.json"
 }
