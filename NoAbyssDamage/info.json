@@ -6,5 +6,5 @@
   "AssemblyName": "NoAbyssDamage.dll",
   "EntryMethod": "NoAbyssDamage.Main.Load"
   "HomePage": "https://github.com/DrAbcrealone/Taiwu_mod",
-  "Repository": "https://raw.github.com/DrAbcrealone/Taiwu_mod/tree/master/NoAbyssDamage/info.json"
+  "Repository": "https://raw.githubusercontent.com/DrAbcrealone/Taiwu_mod/master/NoAbyssDamage/info.json"
 }
