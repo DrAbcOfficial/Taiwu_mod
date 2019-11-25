@@ -1,6 +1,9 @@
-﻿using Harmony12;
+﻿#define DEBUG
+
+using Harmony12;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityModManagerNet;
@@ -15,6 +18,14 @@ namespace XiangShuScroll
         /// 替换内容 太吾名称 相枢名称 神剑名称
         /// </summary>
         public string[] name = { "相枢", "太吾", "EX咖喱棒" };
+        /// <summary>
+        /// 替换任何你想替换的东西
+        /// </summary>
+        public string[][] other = { new string[] { "狮相", "章鱼" } , new string[] { "青琅主", "青琅猪" } };
+        /// <summary>
+        /// 保存按钮
+        /// </summary>
+        /// <param name="modEntry"></param>
         public override void Save(UnityModManager.ModEntry modEntry)
         {
             Save(this, modEntry);
@@ -22,7 +33,7 @@ namespace XiangShuScroll
 
     }
 
-    public class Main
+    public static class Main
     {
         public static Settings settings;
         public static UnityModManager.ModEntry.ModLogger Logger;
@@ -47,10 +58,73 @@ namespace XiangShuScroll
         /// </summary>
         private static readonly string[] cnMaxUnit = { "", "万", "亿", "万亿" };
         /// <summary>
+        /// 被替换字段初始化
+        /// </summary>
+        private static string cacheReplacer = string.Empty; 
+        /// <summary>
+        /// 替换字段
+        /// </summary>
+        private static string cacheReplacee = string.Empty;
+        /// <summary>
+        /// 是否点下了保存按钮
+        /// </summary>
+        private static bool saveflag = false;
+        /// <summary>
+        /// 从数组读取字符串
+        /// </summary>
+        /// <param name="instr">输入数组</param>
+        /// <param name="index">读取索引</param>
+        /// <returns></returns>
+        private static string ReadStrFromSave(in string[][] instr, in int index = 0)
+        {
+            string cache = string.Empty;
+            foreach (string[] a in instr)
+            {
+                cache += a[index] + "\n";
+            }
+            return cache;
+        }
+        /// <summary>
+        /// 从字符串读取数组
+        /// </summary>
+        /// <param name="str1">被替换字符串</param>
+        /// <param name="str2">替换字符串</param>
+        /// <returns></returns>
+        private static bool ReadListFromStr(in string str1, in string str2)
+        {
+            string[] parser1 = str1.Split('\n').Where(s => !string.IsNullOrEmpty(s)).ToArray();
+            string[] parser2 = str2.Split('\n').Where(s => !string.IsNullOrEmpty(s)).ToArray();
+            List<string[]> list = new List<string[]>();
+            if (parser1.Length != parser2.Length)
+                return false;
+
+            for (int i = 0; i < parser1.Length; i++)
+            {
+                list.Add(new string[] { parser1[i], parser2[i] });
+            }
+            settings.other = list.ToArray();
+
+            #region  DEBUG
+            int numm = 0;
+            foreach (string[] b in list)
+            {
+                Logger.Log(numm + " | " + b[0] + b[1]);
+            }
+            foreach (string[] a in settings.other)
+            {
+                Logger.Log(numm + " | " + a[0] + a[1]);
+                numm++;
+            }
+            #endregion
+
+            return true;
+        }
+        /// <summary>
         /// 入口点
         /// </summary>
         /// <param name="mod">mod</param>
         /// <returns></returns>
+        /// 
         public static bool Load(UnityModManager.ModEntry mod)
         {
             Logger = mod.Logger;
@@ -63,6 +137,10 @@ namespace XiangShuScroll
             mod.OnToggle = OnToggle;
             mod.OnGUI = OnGUI;
             mod.OnSaveGUI = OnSaveGUI;
+
+            cacheReplacer = ReadStrFromSave(settings.other, 0);
+            cacheReplacee = ReadStrFromSave(settings.other, 1);
+
             return true;
         }
         /// <summary>
@@ -87,21 +165,44 @@ namespace XiangShuScroll
         {
             GUILayout.BeginHorizontal("Box");
             GUILayout.Label("修改太吾名称:"); GUILayout.Space(16);
-            settings.name[0] = GUILayout.TextField(settings.name[0], "宁叫啥勒？"); GUILayout.Space(16);
+            settings.name[0] = GUILayout.TextField(settings.name[0]); GUILayout.Space(16);
             GUILayout.Label("修改相枢名称:"); GUILayout.Space(16);
-            settings.name[1] = GUILayout.TextField(settings.name[1], "他叫啥勒？"); GUILayout.Space(16);
+            settings.name[1] = GUILayout.TextField(settings.name[1]); GUILayout.Space(16);
             GUILayout.Label("修改剑柄名称:"); GUILayout.Space(16);
-            settings.name[2] = GUILayout.TextField(settings.name[2], "剑叫啥勒？"); GUILayout.Space(16);
-
-            if (GUILayout.Button("更新名称"))
-                Main.update = true;
-            GUILayout.Space(16);
-            if (Main.update)
-                GUILayout.Label("<color=#E4504DFF>修改将在重启游戏后生效！</color>");
-            else
-                GUILayout.Label("修改将在重启游戏后生效");
+            settings.name[2] = GUILayout.TextField(settings.name[2]); GUILayout.Space(16);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal("Box");
+            GUILayout.Label("修改名称"); GUILayout.Label("被修改名称");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal("Box");
+            GUILayout.MinWidth(32);
+            GUILayout.MaxWidth(96);
+            cacheReplacer = GUILayout.TextArea(cacheReplacer);
+            GUILayout.Space(16);
+            GUILayout.MinWidth(32);
+            GUILayout.MaxWidth(96);
+            cacheReplacee = GUILayout.TextArea(cacheReplacee);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("保存数据"))
+            {
+                update = true;
+                saveflag = ReadListFromStr(cacheReplacer, cacheReplacee);
+            }
+            if (!saveflag && update)
+                GUILayout.Label("<color=#E4504DFF>两边文本框长度不一致！保存失败！</color>");
+
+            GUILayout.BeginHorizontal("Box");
+            if (update)
+                GUILayout.Label("<color=#24504DFF>储存完毕！</color>");
+            else
+                GUILayout.Label("<color=#E4504DFF>修改将在重启游戏后生效</color>");
+            GUILayout.EndHorizontal();
+
         }
         public static void OnSaveGUI(UnityModManager.ModEntry mod)
         {
@@ -145,7 +246,6 @@ namespace XiangShuScroll
         /// <param name="cnString">中文字符</param>
         private static void SectionToChines(int section, ref string cnString)
         {
-            string strIns = string.Empty;
             int unitPos = 0;
             bool zero = true;
             while (section > 0)
@@ -162,7 +262,7 @@ namespace XiangShuScroll
                 else
                 {
                     zero = false;
-                    strIns = $"{cnNumberString[v]}{cnMinUnit[unitPos]}";
+                    string strIns = $"{cnNumberString[v]}{cnMinUnit[unitPos]}";
                     cnString = cnString.Insert(0, strIns);
                 }
                 unitPos++;
@@ -241,6 +341,16 @@ namespace XiangShuScroll
 
                     //替换内容为C#占位符，如果为空则不替换
                     string cache = pair.Value;
+                    //先替换其他内容
+                    foreach (string[] parse in settings.other)
+                    {
+                        if (cache.Contains(parse[0]))
+                        {
+                            cache.Replace(parse[0], parse[1]);
+                            num++;
+                        }
+                    }
+
                     if (!string.IsNullOrEmpty(settings.name[0]))
                         cache = cache.Replace("太吾", "{0}");
                     if (!string.IsNullOrEmpty(settings.name[1]))
@@ -258,9 +368,9 @@ namespace XiangShuScroll
 
                         a.Add(pair.Key, cache);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
-                        //出错未替换项目就throw了，然后+1
+                        //出错未替换项目就无视了，然后+1
                         i++;
                     }
                 }
