@@ -1,0 +1,9 @@
+{
+  "Id": "GoogleScroll",
+  "DisplayName": "鸡翻绘卷",
+  "Author": "Dr.Abc",
+  "Version": "0.0.1",
+  "AssemblyName": "GoogleScroll.dll",
+  "EntryMethod": "GoogleScroll.Main.Load",
+  "HomePage": "https://github.com/DrAbcrealone/Taiwu_mod"
+}
